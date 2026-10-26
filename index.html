@@ -1,518 +1,357 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Maria Fernanda ✨ 4 años de amor neón ✨</title>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #0a0f1e;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Canvas de partículas (I LOVE YOU) */
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.85;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* Tarjeta principal con fondo sólido semi-transparente para legibilidad */
-        .card {
-            background: rgba(10, 15, 30, 0.92);
-            backdrop-filter: blur(4px);
-            border-radius: 3rem;
-            padding: 2rem 1.8rem;
-            box-shadow: 0 0 20px cyan, 0 0 5px magenta;
-            text-align: center;
-            border: 1px solid rgba(0, 255, 255, 0.6);
-            animation: borderNeon 2s infinite alternate;
-        }
-
-        @keyframes borderNeon {
-            0% { box-shadow: 0 0 8px cyan, 0 0 8px magenta; border-color: rgba(0, 255, 255, 0.5);}
-            100% { box-shadow: 0 0 30px cyan, 0 0 30px magenta; border-color: rgba(255, 0, 255, 0.7);}
-        }
-
-        /* Título neón */
-        .title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 3rem;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 0 0 5px #ff4e50, 0 0 10px #f9d423, 0 0 20px #ff4e50;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #ffd966;
-            font-weight: 500;
-            text-shadow: 0 0 8px #ffaa33;
-            border-bottom: 2px solid #ffb6b9;
-            display: inline-block;
-            padding-bottom: 6px;
-            margin-bottom: 1.8rem;
-        }
-
-        .counters {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0 1.5rem;
-        }
-
-        .counter-box {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 2rem;
-            padding: 1rem 1.5rem;
-            min-width: 200px;
-            box-shadow: 0 0 12px cyan;
-            border: 1px solid rgba(0, 255, 255, 0.5);
-        }
-
-        .counter-box i {
-            font-size: 2rem;
-            color: #ff66aa;
-            text-shadow: 0 0 8px hotpink;
-        }
-
-        .counter-number {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 0 0 10px cyan;
-        }
-
-        .timer-section {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 2rem;
-            padding: 1.3rem;
-            margin: 1rem 0 2rem;
-            box-shadow: 0 0 15px magenta;
-        }
-
-        .time-unit {
-            background: rgba(255,255,240,0.15);
-            border-radius: 1.5rem;
-            padding: 0.6rem 1rem;
-            min-width: 80px;
-            backdrop-filter: blur(4px);
-        }
-
-        .time-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #ff99cc;
-            text-shadow: 0 0 10px hotpink;
-        }
-
-        /* Sección orgullo */
-        .pride-section {
-            background: rgba(0, 0, 0, 0.75);
-            border-radius: 2rem;
-            padding: 1.5rem;
-            margin: 1.8rem 0;
-            text-align: left;
-            border: 2px solid #ffb7b0;
-            box-shadow: 0 0 18px #ff44aa;
-        }
-
-        .badge-senati {
-            background: linear-gradient(90deg, #b22234, #ff4d4d);
-            color: #ffd966;
-            display: inline-block;
-            padding: 0.2rem 1rem;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 0.8rem;
-            box-shadow: 0 0 10px gold;
-        }
-
-        .pride-title {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.7rem;
-            color: #ffaa88;
-            text-shadow: 0 0 8px red;
-        }
-
-        .pride-text, .letter-text {
-            color: #f5f5f5;
-            text-shadow: 0 0 4px #000;
-            line-height: 1.6;
-        }
-
-        .goal-list li, .promise-list li {
-            color: #ffddcc;
-            margin: 0.5rem 0;
-        }
-
-        /* Propuesta destacada neón */
-        .proposal-highlight {
-            background: rgba(255, 215, 0, 0.25);
-            border-radius: 2rem;
-            padding: 1rem 1.5rem;
-            margin: 1rem 0;
-            text-align: center;
-            border-left: 8px solid #ffb347;
-            border-right: 8px solid #ffb347;
-            box-shadow: 0 0 25px gold;
-            backdrop-filter: blur(4px);
-        }
-
-        .proposal-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffdd99;
-            font-family: 'Dancing Script', cursive;
-            text-shadow: 0 0 8px orange;
-        }
-
-        .love-letter {
-            background: rgba(0, 0, 0, 0.75);
-            padding: 1.8rem;
-            border-radius: 2rem;
-            margin: 2rem 0;
-            text-align: left;
-            box-shadow: 0 0 20px cyan;
-            border-left: 8px solid #ff7b89;
-        }
-
-        .heart-button {
-            background: linear-gradient(95deg, #ff4e50, #f9d423);
-            border: none;
-            color: white;
-            font-size: 1.3rem;
-            font-weight: bold;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 20px red;
-            transition: 0.2s;
-            margin: 1rem 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .heart-button:hover {
-            transform: scale(1.03);
-            box-shadow: 0 0 40px red;
-        }
-
-        .floating-heart {
-            position: fixed;
-            pointer-events: none;
-            bottom: 0;
-            font-size: 1.8rem;
-            animation: floatUpLove 2s ease-out forwards;
-            z-index: 9999;
-        }
-
-        @keyframes floatUpLove {
-            0% { transform: translateY(0) scale(0.8); opacity: 1; }
-            100% { transform: translateY(-300px) scale(1.2); opacity: 0; }
-        }
-
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #ffccaa;
-            background: rgba(0,0,0,0.6);
-            padding: 0.8rem;
-            border-radius: 2rem;
-        }
-
-        @media (max-width: 680px) {
-            .title { font-size: 2.3rem; }
-            .counter-number { font-size: 1.8rem; }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corazón de Partículas Azules</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      display: block;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
 
-<canvas id="particleCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-<div class="container">
-    <div class="card">
-        <h1 class="title">
-            <i class="fas fa-heart" style="color:#ff5e6e; filter: drop-shadow(0 0 5px red);"></i> 
-            Maria Fernanda, 4 años de mi vida 
-            <i class="fas fa-heart" style="color:#ff5e6e; filter: drop-shadow(0 0 5px red);"></i>
-        </h1>
-        <div class="subtitle">
-            <i class="fas fa-calendar-alt"></i> 10 de Junio — Mi eterno amor, mi orgullo, mi todo
-        </div>
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
 
-        <div class="counters">
-            <div class="counter-box">
-                <i class="fas fa-hourglass-half"></i>
-                <div class="counter-number" id="daysTogether">0</div>
-                <div class="counter-label">Días a tu lado</div>
-                <div class="small-note">❤️ desde el 10/06/2022</div>
-            </div>
-            <div class="counter-box">
-                <i class="fas fa-gift"></i>
-                <div class="counter-number" id="monthsTogether">0</div>
-                <div class="counter-label">Meses de magia</div>
-                <div class="small-note">✨ a tu lado, mi sueño ✨</div>
-            </div>
-        </div>
+    // Paleta de colores exacta mostrada en el video
+    const BLUE_SHADES = [
+      "#38b2f6", "#60a5fa", // blue-400
+      "#93c5fd", "#2563eb", // blue-600
+      "#bfdbfe", "#1d4ed8", // blue-700
+      "#38bdf8", "#e0f2fe"  // brillos cian/blancos adicionales
+    ];
 
-        <div class="timer-section">
-            <div class="timer-title">
-                <i class="far fa-clock"></i> Faltan para celebrar nuestro 4to aniversario:
-            </div>
-            <div class="timer" id="countdownTimer">
-                <div class="time-unit"><div class="time-number" id="daysLeft">00</div><div class="time-label">Días</div></div>
-                <div class="time-unit"><div class="time-number" id="hoursLeft">00</div><div class="time-label">Horas</div></div>
-                <div class="time-unit"><div class="time-number" id="minutesLeft">00</div><div class="time-label">Minutos</div></div>
-                <div class="time-unit"><div class="time-number" id="secondsLeft">00</div><div class="time-label">Segundos</div></div>
-            </div>
-            <div id="anniversarySpecialMsg" class="aniversary-message">
-                <i class="fas fa-star-of-life"></i> 4 años, una vida de emociones <i class="fas fa-star-of-life"></i>
-            </div>
-        </div>
+    const floatParticles = [];
+    const burstParticles = [];
+    const heartParticles = [];
+    const FLOAT_COUNT = 160;
+    const HEART_COUNT = 3200;
 
-        <!-- Sección orgullo -->
-        <div class="pride-section">
-            <div class="badge-senati"><i class="fas fa-graduation-cap"></i> SENATI · Seguridad Industrial</div>
-            <div class="pride-title"><i class="fas fa-trophy"></i> Mi orgullo más grande, María Fernanda</div>
-            <div class="pride-text">
-                <strong>Estás terminando la carrera de Seguridad Industrial en el SENATI</strong> y no tengo palabras para describir lo que siento por ti. 
-                Verte luchar, crecer y construir un futuro brillante me llena de admiración. Eres fuerte, inteligente y valiente. 
-                Sé que serás una profesional increíble, velando por la seguridad de los demás, y yo estaré a tu lado aplaudiendo cada uno de tus logros.
-                <br><br>
-                <i class="fas fa-quote-left"></i> Quiero que cumplas <strong>TODAS</strong> tus metas, las de hoy y las que aún sueñas. 
-                Nada me haría más feliz que verte alcanzar cada estrella que te propongas. 
-                Y si alguna vez el camino es difícil, recuerda que aquí estoy yo, tu compañero, para sostenerte y celebrar contigo.
-            </div>
-            <ul class="goal-list">
-                <li><i class="fas fa-hard-hat"></i> <strong>Graduarte con honores</strong> — porque sé que lo lograrás.</li>
-                <li><i class="fas fa-chart-line"></i> <strong>Crecer en tu profesión</strong> y salvar vidas.</li>
-                <li><i class="fas fa-plane"></i> <strong>Viajar y conocer el mundo</strong> — juntos.</li>
-                <li><i class="fas fa-home"></i> <strong>Construir un hogar lleno de amor</strong>.</li>
-                <li><i class="fas fa-heart"></i> <strong>Ser infinitamente feliz</strong>.</li>
-            </ul>
-            <div style="background: rgba(0,0,0,0.5); border-radius: 30px; padding: 8px; text-align: center;">
-                <i class="fas fa-hands-helping"></i> Prometo apoyarte en cada paso hacia tus sueños. ¡Nada apagará tu luz!
-            </div>
-        </div>
+    // Función matemática para generar coordenadas dentro de la silueta de un corazón
+    function getHeartPoint(scale) {
+      const t = Math.random() * Math.PI * 2;
+      // Distribución concentrada hacia los bordes pero rellenando el interior
+      const r = Math.pow(Math.random(), 0.42);
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = -(
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t)
+      );
+      return {
+        x: x * r * scale,
+        y: y * r * scale
+      };
+    }
 
-        <!-- Carta -->
-        <div class="love-letter">
-            <div class="letter-title"><i class="fas fa-envelope-open-text"></i> Para María Fernanda, el amor de mi vida</div>
-            <div class="letter-text">
-                Mi amor, mi compañera de alma:
-                <br><br>
-                <div class="proposal-highlight">
-                    <div class="proposal-text">💍 Ya mismo cumplimos 4 años y no recuerdo ese 10 de junio cuando supe que contigo sería para siempre por mi accidente. <strong>Quiero pedirte la mano formalmente, con todas nuestras familias, como se debe.</strong> Porque, sinceramente, soy un idiota por no haberlo hecho antes. aceptas?</div>
-                </div>
-                <br>
-                tambien quiero decirte que no hay palabras para describir lo que siento por ti —eres mi calma, mi motivación, mi mayor orgullo.
-                <br><br>
-                Verte avanzar en <strong>Seguridad Industrial en SENATI</strong> me llena de admiración. Eres una mujer luchadora, y sé que vas a cambiar vidas.
-                <br><br>
-                <strong>Una vida junto a ti es lo único que deseo.</strong> Quiero despertar cada día a tu lado, celebrar tus triunfos, abrazarte en los días grises y construir un futuro donde ningún sueño quede sin cumplir. No quiero perderte, porque sin ti el mundo perdería su color.
-                <br><br>
-                Gracias por elegirme, por crecer conmigo, por regalarme tu sonrisa. Este 4to aniversario es solo el comienzo de una historia eterna. Te prometo luchar cada día por nosotros.
-            </div>
-            <ul class="promise-list">
-                <li><i class="fas fa-check-circle"></i> Apoyarte siempre para que cumplas cada meta.</li>
-                <li><i class="fas fa-check-circle"></i> Cuidar tu corazón como el tesoro más valioso.</li>
-                <li><i class="fas fa-check-circle"></i> Ser tu lugar seguro, tu amigo y tu amante.</li>
-                <li><i class="fas fa-check-circle"></i> Recordarte cada día lo increíble que eres.</li>
-            </ul>
-            <div class="signature">Con toda mi alma, <br> Tu compañero de vida, que te ama sin medida. ✨</div>
-        </div>
+    class Particle {
+      constructor(x, y, type) {
+        this.type = type;
+        this.color = BLUE_SHADES[Math.floor(Math.random() * BLUE_SHADES.length)];
 
-        <button class="heart-button" id="sendHeartsBtn">
-            <i class="fas fa-heartbeat"></i> Tocar aquí, lluvia de amor para MF
-            <i class="fas fa-heart"></i>
-        </button>
-        <p style="color:#ffcc99;"><i class="fas fa-smile-wink"></i> Presiona y envía corazones + confeti</p>
-    </div>
-    <footer><i class="fas fa-infinity"></i> 10 de Junio · 4 años junto a Maria Fernanda · Mis metas son las tuyas <i class="fas fa-infinity"></i></footer>
-</div>
-
-<script>
-    // ==================== CANVAS CON PUNTOS (I LOVE YOU) ====================
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let points = [];
-
-    class Point {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-            this.vx = (Math.random() - 0.5) * 0.3;
-            this.vy = (Math.random() - 0.5) * 0.3;
-            this.originalX = x;
-            this.originalY = y;
+        if (type === "float") {
+          this.x = x;
+          this.y = y;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = -Math.random() * 0.8 - 0.2;
+          this.size = Math.random() * 1.8 + 0.5;
+          this.maxLife = 120 + Math.random() * 120;
+          this.life = Math.random() * this.maxLife;
+        } else if (type === "burst") {
+          this.x = x;
+          this.y = y;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 6 + 1.5;
+          this.vx = Math.cos(angle) * speed;
+          this.vy = Math.sin(angle) * speed;
+          this.size = Math.random() * 2.4 + 0.8;
+          this.maxLife = 50 + Math.random() * 50;
+          this.life = 0;
+        } else if (type === "heart") {
+          this.resetHeartTarget();
+          this.x = this.tx + (Math.random() - 0.5) * 30;
+          this.y = this.ty + (Math.random() - 0.5) * 30;
+          this.vx = 0;
+          this.vy = 0;
+          this.size = Math.random() * 1.9 + 0.6;
+          this.shimmerOffset = Math.random() * Math.PI * 2;
+          this.vortexAngle = Math.random() * Math.PI * 2;
+          this.vortexSpeed = (Math.random() - 0.5) * 0.08;
         }
-        update() {
+      }
+
+      resetHeartTarget() {
+        const scale = Math.min(width, height) * 0.0135;
+        const pt = getHeartPoint(scale);
+        this.tx = width / 2 + pt.x;
+        this.ty = height / 2 - Math.min(width, height) * 0.04 + pt.y;
+      }
+
+      update(phase, chargeLevel) {
+        if (this.type === "float") {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life++;
+          if (this.life >= this.maxLife || this.y < 0) {
+            this.x = width / 2 + (Math.random() - 0.5) * 260;
+            this.y = height / 2 + Math.min(width, height) * 0.2 + (Math.random() - 0.5) * 40;
+            this.life = 0;
+          }
+        } else if (this.type === "burst") {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.95;
+          this.vy *= 0.95;
+          // Ligera turbulencia
+          this.vx += (Math.random() - 0.5) * 0.3;
+          this.vy += (Math.random() - 0.5) * 0.3;
+          this.life++;
+        } else if (this.type === "heart") {
+          if (phase === "exploded") {
+            // Movimiento de turbulencia/nebulosa durante la explosión
+            this.vortexAngle += this.vortexSpeed;
+            this.vx += Math.cos(this.vortexAngle) * 0.25;
+            this.vy += Math.sin(this.vortexAngle) * 0.25;
+            this.vx *= 0.94;
+            this.vy *= 0.94;
             this.x += this.vx;
             this.y += this.vy;
-            // retorno suave a la posición original
-            this.x += (this.originalX - this.x) * 0.03;
-            this.y += (this.originalY - this.y) * 0.03;
+          } else {
+            // Atracción suave hacia la forma del corazón
+            const dx = this.tx - this.x;
+            const dy = this.ty - this.y;
+            this.vx = this.vx * 0.85 + dx * 0.07;
+            this.vy = this.vy * 0.85 + dy * 0.07;
+
+            // Vibración de energía interna
+            const jitter = 0.3 + chargeLevel * 0.9;
+            this.x += this.vx + (Math.random() - 0.5) * jitter;
+            this.y += this.vy + (Math.random() - 0.5) * jitter;
+          }
         }
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 2.2, 0, Math.PI * 2);
-            ctx.fillStyle = `hsl(${Math.sin(Date.now() * 0.002 + this.x) * 60 + 280}, 100%, 65%)`;
-            ctx.fill();
+      }
+
+      draw(ctx, time, chargeLevel, phase) {
+        ctx.fillStyle = this.color;
+        if (this.type === "float") {
+          const alpha = Math.sin((this.life / this.maxLife) * Math.PI) * 0.65;
+          ctx.globalAlpha = Math.max(0, alpha);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (this.type === "burst") {
+          const alpha = 1 - this.life / this.maxLife;
+          ctx.globalAlpha = Math.max(0, alpha);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (this.type === "heart") {
+          const shimmer = 0.55 + 0.45 * Math.sin(time * 0.006 + this.shimmerOffset);
+          const extraGlow = phase === "charging" ? chargeLevel * 0.4 : 0.2;
+          ctx.globalAlpha = Math.min(1, shimmer + extraGlow);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
         }
+      }
     }
 
-    function resizeCanvas() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
-        generatePoints();
+    // Inicialización de partículas flotantes (igual que en el video)
+    for (let i = 0; i < FLOAT_COUNT; i++) {
+      const p = new Particle(
+        Math.random() * width,
+        Math.random() * height,
+        "float"
+      );
+      p.life = Math.random() * p.maxLife; // stagger starting life
+      floatParticles.push(p);
     }
 
-    function generatePoints() {
-        points = [];
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.fillStyle = "white";
-        tempCtx.font = "bold 90px 'Dancing Script', cursive";
-        tempCtx.textAlign = "center";
-        tempCtx.textBaseline = "middle";
-        tempCtx.fillText("I LOVE YOU", width/2, height/2 - 50);
-        tempCtx.font = "50px 'Dancing Script'";
-        tempCtx.fillText("Maria Fernanda", width/2, height/2 + 60);
-        
-        const imageData = tempCtx.getImageData(0, 0, width, height);
-        const step = 10;
-        for (let y = 0; y < height; y += step) {
-            for (let x = 0; x < width; x += step) {
-                const idx = (y * width + x) * 4;
-                if (imageData.data[idx + 3] > 100) {
-                    points.push(new Point(x + (Math.random() - 0.5) * 5, y + (Math.random() - 0.5) * 5));
-                }
-            }
+    // Inicialización de las partículas del corazón
+    for (let i = 0; i < HEART_COUNT; i++) {
+      heartParticles.push(new Particle(width / 2, height / 2, "heart"));
+    }
+
+    // Función de explosión de partículas del video
+    function spawnHeartBurst(x, y) {
+      const count = 140;
+      for (let i = 0; i < count; i++) {
+        burstParticles.push(new Particle(x, y, "burst"));
+      }
+    }
+
+    // Dibuja el portal/base brillante azul debajo del corazón
+    function drawGlowingBase(time, chargeLevel) {
+      const scale = Math.min(width, height) * 0.0135;
+      const baseX = width / 2;
+      const baseY = height / 2 - Math.min(width, height) * 0.04 + 17.5 * scale;
+      const rx = scale * 9.5;
+      const ry = scale * 2.2;
+
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+
+      // Resplandor elíptico principal
+      ctx.translate(baseX, baseY);
+      ctx.scale(1, ry / rx);
+
+      const pulse = 1 + Math.sin(time * 0.008) * 0.08 + chargeLevel * 0.15;
+      const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, rx * pulse);
+      grad.addColorStop(0, "rgba(224, 242, 254, 0.95)");
+      grad.addColorStop(0.3, "rgba(56, 189, 248, 0.75)");
+      grad.addColorStop(0.65, "rgba(37, 99, 235, 0.35)");
+      grad.addColorStop(1, "rgba(29, 78, 216, 0)");
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, rx * pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Haz de energía ascendente hacia la punta del corazón
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      const beamGrad = ctx.createLinearGradient(baseX, baseY, baseX, baseY - scale * 10);
+      beamGrad.addColorStop(0, "rgba(56, 189, 248, 0.45)");
+      beamGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
+      ctx.fillStyle = beamGrad;
+      ctx.beginPath();
+      ctx.moveTo(baseX - rx * 0.6, baseY);
+      ctx.lineTo(baseX + rx * 0.6, baseY);
+      ctx.lineTo(baseX + rx * 0.2, baseY - scale * 9);
+      ctx.lineTo(baseX - rx * 0.2, baseY - scale * 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Dispara la dispersión/explosión del corazón en múltiples núcleos
+    function triggerExplosion() {
+      const scale = Math.min(width, height) * 0.0135;
+      const cx = width / 2;
+      const cy = height / 2 - Math.min(width, height) * 0.04;
+
+      // Crear varios focos de explosión dentro del corazón
+      const clusters = 8;
+      const centers = [];
+      for (let i = 0; i < clusters; i++) {
+        const pt = getHeartPoint(scale * 0.8);
+        const bx = cx + pt.x;
+        const by = cy + pt.y;
+        centers.push({ x: bx, y: by });
+        spawnHeartBurst(bx, by);
+      }
+
+      // Impulsar las partículas del corazón en remolinos
+      heartParticles.forEach((p) => {
+        const c = centers[Math.floor(Math.random() * centers.length)];
+        const angle = Math.atan2(p.y - c.y, p.x - c.x) + (Math.random() - 0.5) * 1.2;
+        const force = Math.random() * 7 + 1.5;
+        p.vx = Math.cos(angle) * force;
+        p.vy = Math.sin(angle) * force;
+      });
+    }
+
+    // Control del ciclo de animación (Carga -> Explosión -> Reconstrucción)
+    let cycleStart = performance.now();
+    let phase = "charging";
+    let explodedTriggered = false;
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+
+      // Estela suave en fondo negro para dar efecto de brillo en movimiento
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 0.28;
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, width, height);
+
+      const elapsed = (now - cycleStart) % 9000; // Ciclo de 9 segundos
+      let chargeLevel = 0;
+
+      if (elapsed < 4200) {
+        phase = "charging";
+        explodedTriggered = false;
+        chargeLevel = elapsed / 4200;
+      } else if (elapsed < 6800) {
+        phase = "exploded";
+        chargeLevel = 1;
+        if (!explodedTriggered) {
+          explodedTriggered = true;
+          triggerExplosion();
         }
-        // puntos adicionales de fondo
-        for (let i = 0; i < 200; i++) {
-            points.push(new Point(Math.random() * width, Math.random() * height));
+      } else {
+        phase = "reforming";
+        chargeLevel = 1 - (elapsed - 6800) / 2200;
+      }
+
+      // Dibujar base luminosa
+      drawGlowingBase(now, chargeLevel);
+
+      // Modo de fusión aditiva para que las partículas brillen al superponerse
+      ctx.globalCompositeOperation = "lighter";
+
+      // Actualizar y dibujar partículas flotantes de fondo
+      for (let i = 0; i < floatParticles.length; i++) {
+        floatParticles[i].update(phase, chargeLevel);
+        floatParticles[i].draw(ctx, now, chargeLevel, phase);
+      }
+
+      // Actualizar y dibujar partículas del corazón
+      for (let i = 0; i < heartParticles.length; i++) {
+        heartParticles[i].update(phase, chargeLevel);
+        heartParticles[i].draw(ctx, now, chargeLevel, phase);
+      }
+
+      // Actualizar y dibujar partículas de explosión (burstParticles)
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const bp = burstParticles[i];
+        bp.update(phase, chargeLevel);
+        bp.draw(ctx, now, chargeLevel, phase);
+        if (bp.life >= bp.maxLife) {
+          burstParticles.splice(i, 1);
         }
+      }
     }
 
-    function animatePoints() {
-        if (!ctx) return;
-        ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "rgba(10, 15, 30, 0.15)";
-        ctx.fillRect(0, 0, width, height);
-        for (let p of points) {
-            p.update();
-            p.draw();
-        }
-        requestAnimationFrame(animatePoints);
-    }
-
-    window.addEventListener('resize', () => resizeCanvas());
-    resizeCanvas();
-    animatePoints();
-
-    // ==================== CONTADORES Y CORAZONES ====================
-    const START_DATE = new Date(2022, 5, 10);
-    function updateDaysTogether() {
-        const today = new Date();
-        const startUTC = Date.UTC(2022, 5, 10);
-        const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-        const days = Math.floor((todayUTC - startUTC) / (1000*60*60*24));
-        document.getElementById('daysTogether').innerText = days > 0 ? days : 0;
-        document.getElementById('monthsTogether').innerText = Math.floor(days / 30.44);
-    }
-    function getNextAnniversary() {
-        const today = new Date();
-        let anni = new Date(today.getFullYear(), 5, 10);
-        if (today > anni) anni = new Date(today.getFullYear()+1, 5, 10);
-        return anni;
-    }
-    function updateCountdown() {
-        const next = getNextAnniversary();
-        const diff = next - new Date();
-        if (diff <= 0) {
-            document.getElementById('daysLeft').innerText = "00";
-            document.getElementById('hoursLeft').innerText = "00";
-            document.getElementById('minutesLeft').innerText = "00";
-            document.getElementById('secondsLeft').innerText = "00";
-            document.getElementById('anniversarySpecialMsg').innerHTML = '<i class="fas fa-grin-hearts"></i> ¡HOY ES NUESTRO DÍA! ¡FELICES 4 AÑOS!';
-            return;
-        }
-        const days = Math.floor(diff / 86400000);
-        const hours = Math.floor((diff % 86400000) / 3600000);
-        const mins = Math.floor((diff % 3600000) / 60000);
-        const secs = Math.floor((diff % 60000) / 1000);
-        document.getElementById('daysLeft').innerText = days < 10 ? '0'+days : days;
-        document.getElementById('hoursLeft').innerText = hours < 10 ? '0'+hours : hours;
-        document.getElementById('minutesLeft').innerText = mins < 10 ? '0'+mins : mins;
-        document.getElementById('secondsLeft').innerText = secs < 10 ? '0'+secs : secs;
-    }
-    updateDaysTogether();
-    updateCountdown();
-    setInterval(() => { updateDaysTogether(); updateCountdown(); }, 1000);
-
-    const btn = document.getElementById('sendHeartsBtn');
-    function createFloatingHeart() {
-        const heart = document.createElement('div');
-        heart.classList.add('floating-heart');
-        const icons = ['❤️','💖','💗','💓','💕','💞','💘','❤️‍🔥','🌸','🌹','✨','💌','🏆','💍'];
-        heart.innerText = icons[Math.floor(Math.random() * icons.length)];
-        heart.style.fontSize = (1 + Math.random() * 2) + 'rem';
-        heart.style.left = Math.random() * window.innerWidth + 'px';
-        heart.style.bottom = '-20px';
-        heart.style.animationDuration = (1.5 + Math.random()) + 's';
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 2500);
-    }
-    function burstHearts(c) { for(let i=0;i<c;i++) setTimeout(()=>createFloatingHeart(), i*40); }
-    function shootConfetti() {
-        canvasConfetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#ff4e50','#f9d423','#ff6a6a'] });
-        canvasConfetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0, y: 0.7 } });
-        canvasConfetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1, y: 0.7 } });
-    }
-    btn.addEventListener('click', () => {
-        burstHearts(45);
-        shootConfetti();
-        btn.style.transform = 'scale(0.97)';
-        setTimeout(() => btn.style.transform = '', 150);
+    // Interacción: al hacer clic o tocar la pantalla se genera una explosión
+    window.addEventListener("pointerdown", (e) => {
+      spawnHeartBurst(e.clientX, e.clientY);
+      cycleStart = performance.now() - 4200;
+      explodedTriggered = false;
     });
-    window.addEventListener('load', () => { burstHearts(12); shootConfetti(); });
-</script>
+
+    // Ajuste automático si cambia el tamaño de la pantalla
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      heartParticles.forEach((p) => p.resetHeartTarget());
+    });
+
+    requestAnimationFrame(animate);
+  </script>
 </body>
 </html>
