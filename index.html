@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Corazón de Partículas Azules</title>
+  <title>Xiomara - Corazón de Partículas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -18,6 +19,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      user-select: none;
     }
     canvas {
       display: block;
@@ -35,25 +37,27 @@
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    // Paleta de colores exacta mostrada en el video
+    // Paleta de colores original del video + destellos blancos/cian de núcleo
     const BLUE_SHADES = [
       "#38b2f6", "#60a5fa", // blue-400
       "#93c5fd", "#2563eb", // blue-600
-      "#bfdbfe", "#1d4ed8", // blue-700
-      "#38bdf8", "#e0f2fe"  // brillos cian/blancos adicionales
+      "#bfdbfe", "#1d4ed8"  // blue-700
     ];
 
     const floatParticles = [];
     const burstParticles = [];
     const heartParticles = [];
+    const baseFlameParticles = [];
     const FLOAT_COUNT = 160;
-    const HEART_COUNT = 3200;
+    const HEART_COUNT = 3800;
+    const BASE_FLAME_COUNT = 120;
 
-    // Función matemática para generar coordenadas dentro de la silueta de un corazón
-    function getHeartPoint(scale) {
+    // Función paramétrica con distribución 3D para dar efecto de borde definido y volumen
+    function getHeartPoint3D(scale) {
       const t = Math.random() * Math.PI * 2;
-      // Distribución concentrada hacia los bordes pero rellenando el interior
-      const r = Math.pow(Math.random(), 0.42);
+      // Concentra más partículas en el contorno (como en el video) y rellena el interior
+      const edgeBias = Math.random() < 0.65 ? Math.pow(Math.random(), 0.18) : Math.pow(Math.random(), 0.65);
+      
       const x = 16 * Math.pow(Math.sin(t), 3);
       const y = -(
         13 * Math.cos(t) -
@@ -61,9 +65,14 @@
         2 * Math.cos(3 * t) -
         Math.cos(4 * t)
       );
+
+      // Ligera dispersión orgánica en los bordes
+      const spread = (1 - edgeBias) * 1.4;
       return {
-        x: x * r * scale,
-        y: y * r * scale
+        x: (x * edgeBias + (Math.random() - 0.5) * spread) * scale,
+        y: (y * edgeBias + (Math.random() - 0.5) * spread) * scale,
+        normY: (y * edgeBias + 17) / 30, // 0 arriba, 1 abajo (para cargar de abajo hacia arriba)
+        isEdge: edgeBias > 0.86
       };
     }
 
@@ -75,111 +84,185 @@
         if (type === "float") {
           this.x = x;
           this.y = y;
-          this.vx = (Math.random() - 0.5) * 0.4;
-          this.vy = -Math.random() * 0.8 - 0.2;
-          this.size = Math.random() * 1.8 + 0.5;
-          this.maxLife = 120 + Math.random() * 120;
+          this.vx = (Math.random() - 0.5) * 0.45;
+          this.vy = -Math.random() * 0.9 - 0.2;
+          this.size = Math.random() * 1.6 + 0.4;
+          this.maxLife = 140 + Math.random() * 140;
           this.life = Math.random() * this.maxLife;
         } else if (type === "burst") {
           this.x = x;
           this.y = y;
           const angle = Math.random() * Math.PI * 2;
-          const speed = Math.random() * 6 + 1.5;
-          this.vx = Math.cos(angle) * speed;
-          this.vy = Math.sin(angle) * speed;
-          this.size = Math.random() * 2.4 + 0.8;
-          this.maxLife = 50 + Math.random() * 50;
+          const speed = Math.random() * 7.5 + 0.8;
+          this.vx = Math.cos(angle) * speed * 0.85;
+          // Tendencia a caer en cascada como en el segundo 00:04 del video
+          this.vy = Math.sin(angle) * speed + Math.random() * 2.2;
+          this.size = Math.random() * 2.5 + 0.6;
+          this.maxLife = 55 + Math.random() * 55;
           this.life = 0;
+          this.isCoreWhite = Math.random() < 0.28;
+        } else if (type === "baseFlame") {
+          this.resetFlame();
+          this.life = Math.random() * this.maxLife;
         } else if (type === "heart") {
           this.resetHeartTarget();
-          this.x = this.tx + (Math.random() - 0.5) * 30;
-          this.y = this.ty + (Math.random() - 0.5) * 30;
+          this.x = this.tx + (Math.random() - 0.5) * 15;
+          this.y = this.ty + (Math.random() - 0.5) * 15;
+          this.px = this.x;
+          this.py = this.y;
           this.vx = 0;
           this.vy = 0;
-          this.size = Math.random() * 1.9 + 0.6;
+          this.size = this.isEdge ? Math.random() * 1.8 + 0.7 : Math.random() * 1.4 + 0.4;
           this.shimmerOffset = Math.random() * Math.PI * 2;
-          this.vortexAngle = Math.random() * Math.PI * 2;
-          this.vortexSpeed = (Math.random() - 0.5) * 0.08;
+          this.noiseAngle = Math.random() * Math.PI * 2;
+          this.noiseSpeed = (Math.random() - 0.5) * 0.09;
+          this.isSparkle = Math.random() < 0.18;
         }
       }
 
-      resetHeartTarget() {
-        const scale = Math.min(width, height) * 0.0135;
-        const pt = getHeartPoint(scale);
-        this.tx = width / 2 + pt.x;
-        this.ty = height / 2 - Math.min(width, height) * 0.04 + pt.y;
+      resetFlame() {
+        const scale = Math.min(width, height) * 0.013;
+        const baseX = width / 2;
+        const baseY = height / 2 - Math.min(width, height) * 0.06 + 17.5 * scale;
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.pow(Math.random(), 0.6) * (scale * 7.5);
+        this.x = baseX + Math.cos(angle) * radius;
+        this.y = baseY + Math.sin(angle) * (radius * 0.22);
+        this.vx = (baseX - this.x) * 0.015 + (Math.random() - 0.5) * 0.5;
+        this.vy = -Math.random() * 1.8 - 0.4;
+        this.size = Math.random() * 2.2 + 0.8;
+        this.maxLife = 25 + Math.random() * 35;
+        this.life = 0;
       }
 
-      update(phase, chargeLevel) {
+      resetHeartTarget() {
+        const scale = Math.min(width, height) * 0.013;
+        const pt = getHeartPoint3D(scale);
+        this.tx = width / 2 + pt.x;
+        this.ty = height / 2 - Math.min(width, height) * 0.06 + pt.y;
+        this.normY = pt.normY;
+        this.isEdge = pt.isEdge;
+      }
+
+      update(phase, progress) {
         if (this.type === "float") {
           this.x += this.vx;
           this.y += this.vy;
           this.life++;
           if (this.life >= this.maxLife || this.y < 0) {
-            this.x = width / 2 + (Math.random() - 0.5) * 260;
-            this.y = height / 2 + Math.min(width, height) * 0.2 + (Math.random() - 0.5) * 40;
+            const scale = Math.min(width, height) * 0.013;
+            this.x = width / 2 + (Math.random() - 0.5) * (scale * 24);
+            this.y = height / 2 + scale * 14 + (Math.random() - 0.5) * 40;
             this.life = 0;
           }
-        } else if (this.type === "burst") {
+        } else if (this.type === "baseFlame") {
           this.x += this.vx;
           this.y += this.vy;
-          this.vx *= 0.95;
-          this.vy *= 0.95;
-          // Ligera turbulencia
-          this.vx += (Math.random() - 0.5) * 0.3;
-          this.vy += (Math.random() - 0.5) * 0.3;
+          this.life++;
+          if (this.life >= this.maxLife) {
+            this.resetFlame();
+          }
+        } else if (this.type === "burst") {
+          this.px = this.x;
+          this.py = this.y;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.94;
+          this.vy *= 0.94;
+          this.vy += 0.06; // Caída suave tipo cascada de energía
+          this.vx += (Math.random() - 0.5) * 0.35;
           this.life++;
         } else if (this.type === "heart") {
+          this.px = this.x;
+          this.py = this.y;
+
           if (phase === "exploded") {
-            // Movimiento de turbulencia/nebulosa durante la explosión
-            this.vortexAngle += this.vortexSpeed;
-            this.vx += Math.cos(this.vortexAngle) * 0.25;
-            this.vy += Math.sin(this.vortexAngle) * 0.25;
-            this.vx *= 0.94;
-            this.vy *= 0.94;
+            // Turbulencia en remolinos y caída como en los segundos 00:04 a 00:07
+            this.noiseAngle += this.noiseSpeed;
+            this.vx += Math.cos(this.noiseAngle) * 0.22;
+            this.vy += Math.sin(this.noiseAngle) * 0.22 + 0.04;
+            this.vx *= 0.93;
+            this.vy *= 0.93;
             this.x += this.vx;
             this.y += this.vy;
           } else {
-            // Atracción suave hacia la forma del corazón
+            // Retorno magnético suave hacia la silueta 3D del corazón
             const dx = this.tx - this.x;
             const dy = this.ty - this.y;
-            this.vx = this.vx * 0.85 + dx * 0.07;
-            this.vy = this.vy * 0.85 + dy * 0.07;
+            const pull = phase === "reforming" ? 0.065 : 0.12;
+            this.vx = this.vx * 0.82 + dx * pull;
+            this.vy = this.vy * 0.82 + dy * pull;
 
-            // Vibración de energía interna
-            const jitter = 0.3 + chargeLevel * 0.9;
+            const jitter = phase === "charging" ? 0.25 + progress * 0.6 : 0.35;
             this.x += this.vx + (Math.random() - 0.5) * jitter;
             this.y += this.vy + (Math.random() - 0.5) * jitter;
           }
         }
       }
 
-      draw(ctx, time, chargeLevel, phase) {
-        ctx.fillStyle = this.color;
+      draw(ctx, time, phase, progress) {
         if (this.type === "float") {
-          const alpha = Math.sin((this.life / this.maxLife) * Math.PI) * 0.65;
+          const alpha = Math.sin((this.life / this.maxLife) * Math.PI) * 0.6;
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = Math.max(0, alpha);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (this.type === "baseFlame") {
+          const alpha = (1 - this.life / this.maxLife) * 0.75;
+          ctx.fillStyle = this.life < this.maxLife * 0.3 ? "#e0f2fe" : "#38bdf8";
           ctx.globalAlpha = Math.max(0, alpha);
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fill();
         } else if (this.type === "burst") {
-          const alpha = 1 - this.life / this.maxLife;
+          const alpha = Math.pow(1 - this.life / this.maxLife, 1.2);
+          ctx.strokeStyle = this.isCoreWhite ? "#e0f2fe" : this.color;
+          ctx.lineWidth = this.size;
           ctx.globalAlpha = Math.max(0, alpha);
           ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(this.px, this.py);
+          ctx.lineTo(this.x, this.y);
+          ctx.stroke();
         } else if (this.type === "heart") {
-          const shimmer = 0.55 + 0.45 * Math.sin(time * 0.006 + this.shimmerOffset);
-          const extraGlow = phase === "charging" ? chargeLevel * 0.4 : 0.2;
-          ctx.globalAlpha = Math.min(1, shimmer + extraGlow);
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fill();
+          const shimmer = 0.5 + 0.5 * Math.sin(time * 0.007 + this.shimmerOffset);
+
+          // Efecto del inicio del video (00:00-00:03): la energía azul sube desde la base
+          let energyMask = 1;
+          if (phase === "charging") {
+            const fillLine = 1 - progress * 1.15; // Sube de 1 (abajo) a 0 (arriba)
+            energyMask = this.normY >= fillLine ? 1 : 0.28;
+          }
+
+          if (phase === "charging" && energyMask < 0.5 && this.isSparkle) {
+            // Puntitos blancos/celestes tenues antes de llenarse de energía azul
+            ctx.fillStyle = "#e0f2fe";
+            ctx.globalAlpha = shimmer * 0.65;
+          } else {
+            ctx.fillStyle = this.isSparkle && shimmer > 0.88 ? "#e0f2fe" : this.color;
+            const baseAlpha = this.isEdge ? 0.85 : 0.55;
+            ctx.globalAlpha = Math.min(1, (baseAlpha * shimmer + 0.2) * energyMask);
+          }
+
+          // Dibuja estela si va rápido (durante la explosión o reconstrucción)
+          const speedSq = this.vx * this.vx + this.vy * this.vy;
+          if (speedSq > 2.5) {
+            ctx.strokeStyle = ctx.fillStyle;
+            ctx.lineWidth = this.size;
+            ctx.beginPath();
+            ctx.moveTo(this.px, this.py);
+            ctx.lineTo(this.x, this.y);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
     }
 
-    // Inicialización de partículas flotantes (igual que en el video)
+    // Inicialización exacta del fragmento del video
     for (let i = 0; i < FLOAT_COUNT; i++) {
       const p = new Particle(
         Math.random() * width,
@@ -190,12 +273,14 @@
       floatParticles.push(p);
     }
 
-    // Inicialización de las partículas del corazón
     for (let i = 0; i < HEART_COUNT; i++) {
       heartParticles.push(new Particle(width / 2, height / 2, "heart"));
     }
 
-    // Función de explosión de partículas del video
+    for (let i = 0; i < BASE_FLAME_COUNT; i++) {
+      baseFlameParticles.push(new Particle(width / 2, height / 2, "baseFlame"));
+    }
+
     function spawnHeartBurst(x, y) {
       const count = 140;
       for (let i = 0; i < count; i++) {
@@ -203,148 +288,207 @@
       }
     }
 
-    // Dibuja el portal/base brillante azul debajo del corazón
-    function drawGlowingBase(time, chargeLevel) {
-      const scale = Math.min(width, height) * 0.0135;
-      const baseX = width / 2;
-      const baseY = height / 2 - Math.min(width, height) * 0.04 + 17.5 * scale;
-      const rx = scale * 9.5;
-      const ry = scale * 2.2;
+    // Dibuja la base de energía azul y el resplandor interior del corazón
+    function drawAurasAndBase(time, phase, progress) {
+      const scale = Math.min(width, height) * 0.013;
+      const cx = width / 2;
+      const cy = height / 2 - Math.min(width, height) * 0.06;
+      const baseX = cx;
+      const baseY = cy + 17.5 * scale;
 
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
 
-      // Resplandor elíptico principal
+      // 1. Resplandor atmosférico azul dentro del corazón según nivel de carga
+      let heartGlowIntensity = 0.45;
+      if (phase === "charging") heartGlowIntensity = 0.1 + progress * 0.55;
+      else if (phase === "exploded") heartGlowIntensity = 0.7;
+
+      const heartAura = ctx.createRadialGradient(cx, cy + scale * 2, scale * 2, cx, cy, scale * 18);
+      heartAura.addColorStop(0, `rgba(56, 189, 248, ${heartGlowIntensity * 0.45})`);
+      heartAura.addColorStop(0.5, `rgba(37, 99, 235, ${heartGlowIntensity * 0.25})`);
+      heartAura.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = heartAura;
+      ctx.beginPath();
+      ctx.arc(cx, cy, scale * 18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 2. Disco de plasma brillante en la base (como en el video)
+      const rx = scale * 8.2;
+      const ry = scale * 1.85;
+      const pulse = 1 + Math.sin(time * 0.01) * 0.06;
+
+      ctx.save();
       ctx.translate(baseX, baseY);
       ctx.scale(1, ry / rx);
 
-      const pulse = 1 + Math.sin(time * 0.008) * 0.08 + chargeLevel * 0.15;
-      const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, rx * pulse);
-      grad.addColorStop(0, "rgba(224, 242, 254, 0.95)");
-      grad.addColorStop(0.3, "rgba(56, 189, 248, 0.75)");
-      grad.addColorStop(0.65, "rgba(37, 99, 235, 0.35)");
-      grad.addColorStop(1, "rgba(29, 78, 216, 0)");
+      const baseGrad = ctx.createRadialGradient(0, 0, scale * 0.5, 0, 0, rx * pulse);
+      baseGrad.addColorStop(0, "rgba(255, 255, 255, 0.98)");
+      baseGrad.addColorStop(0.25, "rgba(125, 211, 252, 0.9)");
+      baseGrad.addColorStop(0.55, "rgba(37, 99, 235, 0.55)");
+      baseGrad.addColorStop(1, "rgba(29, 78, 216, 0)");
 
-      ctx.fillStyle = grad;
+      ctx.fillStyle = baseGrad;
       ctx.beginPath();
       ctx.arc(0, 0, rx * pulse, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Haz de energía ascendente hacia la punta del corazón
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      const beamGrad = ctx.createLinearGradient(baseX, baseY, baseX, baseY - scale * 10);
-      beamGrad.addColorStop(0, "rgba(56, 189, 248, 0.45)");
-      beamGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
-      ctx.fillStyle = beamGrad;
-      ctx.beginPath();
-      ctx.moveTo(baseX - rx * 0.6, baseY);
-      ctx.lineTo(baseX + rx * 0.6, baseY);
-      ctx.lineTo(baseX + rx * 0.2, baseY - scale * 9);
-      ctx.lineTo(baseX - rx * 0.2, baseY - scale * 9);
-      ctx.closePath();
-      ctx.fill();
       ctx.restore();
     }
 
-    // Dispara la dispersión/explosión del corazón en múltiples núcleos
-    function triggerExplosion() {
-      const scale = Math.min(width, height) * 0.0135;
-      const cx = width / 2;
-      const cy = height / 2 - Math.min(width, height) * 0.04;
+    // Dibuja el nombre "Xiomara" en la parte inferior con brillo neón azul
+    function drawXiomaraText(time) {
+      const scale = Math.min(width, height) * 0.013;
+      const textX = width / 2;
+      const textY = height / 2 - Math.min(width, height) * 0.06 + 24.8 * scale;
+      const fontSize = Math.max(28, Math.min(54, scale * 3.8));
 
-      // Crear varios focos de explosión dentro del corazón
-      const clusters = 8;
+      ctx.save();
+      ctx.font = `600 ${fontSize}px 'Cinzel', 'Great Vibes', serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const pulseGlow = 18 + Math.sin(time * 0.004) * 6;
+
+      // Capa de resplandor azul profundo
+      ctx.shadowColor = "#2563eb";
+      ctx.shadowBlur = pulseGlow * 1.5;
+      ctx.fillStyle = "#38bdf8";
+      ctx.globalAlpha = 0.85;
+      ctx.fillText("Xiomara", textX, textY);
+
+      // Capa de núcleo brillante celeste/blanco
+      ctx.shadowColor = "#60a5fa";
+      ctx.shadowBlur = pulseGlow * 0.6;
+      const textGrad = ctx.createLinearGradient(textX - 100, textY - 15, textX + 100, textY + 15);
+      textGrad.addColorStop(0, "#bfdbfe");
+      textGrad.addColorStop(0.5, "#ffffff");
+      textGrad.addColorStop(1, "#93c5fd");
+      ctx.fillStyle = textGrad;
+      ctx.globalAlpha = 0.98;
+      ctx.fillText("Xiomara", textX, textY);
+
+      ctx.restore();
+    }
+
+    // Dispara la explosión multi-núcleo idéntica al segundo 00:04 del video
+    function triggerHeartExplosion() {
+      const scale = Math.min(width, height) * 0.013;
+      const cx = width / 2;
+      const cy = height / 2 - Math.min(width, height) * 0.06;
+
+      const clusters = 9;
       const centers = [];
       for (let i = 0; i < clusters; i++) {
-        const pt = getHeartPoint(scale * 0.8);
+        const pt = getHeartPoint3D(scale * 0.75);
         const bx = cx + pt.x;
         const by = cy + pt.y;
         centers.push({ x: bx, y: by });
         spawnHeartBurst(bx, by);
       }
 
-      // Impulsar las partículas del corazón en remolinos
       heartParticles.forEach((p) => {
         const c = centers[Math.floor(Math.random() * centers.length)];
-        const angle = Math.atan2(p.y - c.y, p.x - c.x) + (Math.random() - 0.5) * 1.2;
-        const force = Math.random() * 7 + 1.5;
+        const angle = Math.atan2(p.y - c.y, p.x - c.x) + (Math.random() - 0.5) * 0.9;
+        const force = Math.random() * 8.5 + 1.5;
         p.vx = Math.cos(angle) * force;
-        p.vy = Math.sin(angle) * force;
+        p.vy = Math.sin(angle) * force + Math.random() * 2.5;
       });
     }
 
-    // Control del ciclo de animación (Carga -> Explosión -> Reconstrucción)
+    // Ciclo de 12 segundos calcado de la línea de tiempo del video
     let cycleStart = performance.now();
     let phase = "charging";
     let explodedTriggered = false;
+    let secondaryBurstTriggered = false;
 
     function animate(now) {
       requestAnimationFrame(animate);
 
-      // Estela suave en fondo negro para dar efecto de brillo en movimiento
+      // Estela negra suave para dar efecto de motion-blur brillante
       ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 0.28;
+      ctx.globalAlpha = 0.32;
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, width, height);
 
-      const elapsed = (now - cycleStart) % 9000; // Ciclo de 9 segundos
-      let chargeLevel = 0;
+      const elapsed = (now - cycleStart) % 12000;
+      let progress = 0;
 
-      if (elapsed < 4200) {
+      if (elapsed < 3800) {
+        // 0.0s a 3.8s: Carga desde la base hacia arriba
         phase = "charging";
         explodedTriggered = false;
-        chargeLevel = elapsed / 4200;
-      } else if (elapsed < 6800) {
+        secondaryBurstTriggered = false;
+        progress = elapsed / 3800;
+      } else if (elapsed < 7200) {
+        // 3.8s a 7.2s: Explosión y nebulosa turbulenta
         phase = "exploded";
-        chargeLevel = 1;
+        progress = (elapsed - 3800) / 3400;
         if (!explodedTriggered) {
           explodedTriggered = true;
-          triggerExplosion();
+          triggerHeartExplosion();
+        }
+        // Segundo pulso de chispas a mitad de la explosión (como en el seg 00:05)
+        if (elapsed > 4700 && !secondaryBurstTriggered) {
+          secondaryBurstTriggered = true;
+          const scale = Math.min(width, height) * 0.013;
+          for (let i = 0; i < 4; i++) {
+            const pt = getHeartPoint3D(scale * 0.9);
+            spawnHeartBurst(width / 2 + pt.x, height / 2 - Math.min(width, height) * 0.06 + pt.y);
+          }
         }
       } else {
+        // 7.2s a 12.0s: Reconstrucción y latido del corazón completo
         phase = "reforming";
-        chargeLevel = 1 - (elapsed - 6800) / 2200;
+        progress = (elapsed - 7200) / 4800;
       }
 
-      // Dibujar base luminosa
-      drawGlowingBase(now, chargeLevel);
+      drawAurasAndBase(now, phase, progress);
 
-      // Modo de fusión aditiva para que las partículas brillen al superponerse
       ctx.globalCompositeOperation = "lighter";
 
-      // Actualizar y dibujar partículas flotantes de fondo
+      // Llamas cortas de la base
+      for (let i = 0; i < baseFlameParticles.length; i++) {
+        baseFlameParticles[i].update(phase, progress);
+        baseFlameParticles[i].draw(ctx, now, phase, progress);
+      }
+
+      // Partículas flotantes de ambiente
       for (let i = 0; i < floatParticles.length; i++) {
-        floatParticles[i].update(phase, chargeLevel);
-        floatParticles[i].draw(ctx, now, chargeLevel, phase);
+        floatParticles[i].update(phase, progress);
+        floatParticles[i].draw(ctx, now, phase, progress);
       }
 
-      // Actualizar y dibujar partículas del corazón
+      // Partículas del corazón 3D
       for (let i = 0; i < heartParticles.length; i++) {
-        heartParticles[i].update(phase, chargeLevel);
-        heartParticles[i].draw(ctx, now, chargeLevel, phase);
+        heartParticles[i].update(phase, progress);
+        heartParticles[i].draw(ctx, now, phase, progress);
       }
 
-      // Actualizar y dibujar partículas de explosión (burstParticles)
+      // Partículas de explosión (burstParticles)
       for (let i = burstParticles.length - 1; i >= 0; i--) {
         const bp = burstParticles[i];
-        bp.update(phase, chargeLevel);
-        bp.draw(ctx, now, chargeLevel, phase);
+        bp.update(phase, progress);
+        bp.draw(ctx, now, phase, progress);
         if (bp.life >= bp.maxLife) {
           burstParticles.splice(i, 1);
         }
       }
+
+      // Dibujar "Xiomara" en la parte inferior
+      ctx.globalCompositeOperation = "source-over";
+      drawXiomaraText(now);
     }
 
-    // Interacción: al hacer clic o tocar la pantalla se genera una explosión
+    // Al tocar la pantalla o hacer clic, explota en ese punto
     window.addEventListener("pointerdown", (e) => {
       spawnHeartBurst(e.clientX, e.clientY);
-      cycleStart = performance.now() - 4200;
+      cycleStart = performance.now() - 3800;
       explodedTriggered = false;
+      secondaryBurstTriggered = false;
     });
 
-    // Ajuste automático si cambia el tamaño de la pantalla
     window.addEventListener("resize", () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
